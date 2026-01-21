@@ -130,6 +130,8 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
         for(let j=0;j<3;j++)
           notes[br+i][bc+j]=notes[br+i][bc+j].filter(n=>n!==num);
     }
+
+    // 🔹 Render med det samme efter indsættelse
     render();
   };
 });
