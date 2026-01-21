@@ -9,33 +9,24 @@ const filesToCache = [
   "./icon-512.png"
 ];
 
-// Install: cache alle filer
-self.addEventListener("install", event => {
+self.addEventListener("install", event=>{
   event.waitUntil(
-    caches.open(cacheName).then(cache => {
-      return cache.addAll(filesToCache);
-    })
+    caches.open(cacheName).then(cache => cache.addAll(filesToCache))
   );
   self.skipWaiting();
 });
 
-// Activate: ryd gamle caches
-self.addEventListener("activate", event => {
+self.addEventListener("activate", event=>{
   event.waitUntil(
-    caches.keys().then(keys => 
-      Promise.all(keys.map(key => {
-        if(key !== cacheName) return caches.delete(key);
-      }))
+    caches.keys().then(keys=>
+      Promise.all(keys.map(key=>key!==cacheName?caches.delete(key):null))
     )
   );
   self.clients.claim();
 });
 
-// Fetch: brug cache først
-self.addEventListener("fetch", event => {
+self.addEventListener("fetch", event=>{
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
+    caches.match(event.request).then(resp=>resp || fetch(event.request))
   );
 });
