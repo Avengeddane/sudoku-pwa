@@ -36,38 +36,41 @@ h1 { margin-bottom: 20px; }
   grid-template-rows: repeat(9, 42px);
   justify-content: center;
   margin: 20px auto;
+  gap: 0; /* Ingen gap, linjer styres med border */
 }
 
 .cell {
-  position: relative;
   width: 42px;
   height: 42px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: normal;
   background: var(--cell);
   border: 1px solid #aaa;
-  cursor: pointer;
   box-sizing: border-box;
+  color: var(--text);
 }
 
-/* Tykke 3x3 linjer */
-.cell[data-col="0"], .cell[data-col="3"], .cell[data-col="6"] { border-left: 3px solid var(--line); }
-.cell[data-col="8"] { border-right: 3px solid var(--line); }
-.cell[data-row="0"], .cell[data-row="3"], .cell[data-row="6"] { border-top: 3px solid var(--line); }
-.cell[data-row="8"] { border-bottom: 3px solid var(--line); }
+/* Fixed tal */
+.cell.fixed {
+  font-weight: bold;
+  color: var(--text);
+  background: #ddd;
+}
 
-/* Farver */
-.cell.fixed { font-weight: bold; color: var(--text); }
-.cell.correct { font-weight: bold; color: var(--correct); }
+/* Fejl og korrekt */
+.cell.correct { color: var(--correct); font-weight: bold; }
 .cell.error { background: var(--error); }
-.cell.selected { background: var(--selected); }
-.cell.same { background: var(--same); }
 
-.value { line-height: 42px; font-size: 18px; }
-.notes { display: grid; grid-template-columns: repeat(3, 1fr); font-size: 10px; padding: 2px; }
-.notes span { color: #555; }
+/* Dark mode */
+body.dark .cell.fixed { background: #555; color: #fff; }
+body.dark .cell.correct { color: var(--correct); }
+body.dark .cell.error { background: var(--error); }
 
+/* Knapper */
 button {
   margin: 4px;
-  padding: 8px;
+  padding: 8px 12px;
   border-radius: 6px;
   border: none;
   background: #007aff;
@@ -77,3 +80,35 @@ button {
 }
 button:hover { opacity: 0.9; }
 #noteToggle.active { background: #ff9f0a; }
+
+/* Responsive input */
+.cell {
+  border-width: 1px;
+  outline: none;
+}
+
+/* 3x3 tykkere linjer */
+.cell:nth-child(9n+1) { border-left-width: 3px; }
+.cell:nth-child(9n) { border-right-width: 3px; }
+.cell:nth-child(n+1):nth-child(-n+9) { border-top-width: 3px; }
+.cell:nth-child(n+73):nth-child(-n+81) { border-bottom-width: 3px; }
+
+/* Tal-knapper layout */
+#numbers {
+  margin-top: 10px;
+}
+#numbers button {
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  padding: 0;
+}
+
+/* Noter (kan udbygges senere som overlay) */
+.notes {
+  font-size: 10px;
+  color: #555;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  line-height: 12px;
+}
