@@ -1,31 +1,41 @@
-const CACHE = "sudoku-v2"; // ← SKIFT NAVN (det er nøglen!)
-const FILES = [
+const cacheName = "sudoku-pwa-v1";
+const filesToCache = [
   "./",
-  "index.html",
-  "style.css",
-  "app.js",
-  "manifest.json"
+  "./index.html",
+  "./app.js",
+  "./style.css",
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
-self.addEventListener("install", e => {
-  self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(FILES))
+// Install: cache alle filer
+self.addEventListener("install", event => {
+  event.waitUntil(
+    caches.open(cacheName).then(cache => {
+      return cache.addAll(filesToCache);
+    })
   );
+  self.skipWaiting();
 });
 
-self.addEventListener("activate", e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(k => k !== CACHE).map(k => caches.delete(k))
-      )
+// Activate: ryd gamle caches
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys => 
+      Promise.all(keys.map(key => {
+        if(key !== cacheName) return caches.delete(key);
+      }))
     )
   );
+  self.clients.claim();
 });
 
-self.addEventListener("fetch", e => {
-  e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+// Fetch: brug cache først
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
+    })
   );
 });
