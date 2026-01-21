@@ -1,5 +1,8 @@
 const boardEl = document.getElementById("board");
+const noteBtn = document.getElementById("noteToggle");
+
 let selected = null;
+let noteMode = false;
 
 const board = [
   [5,3,0,0,7,0,0,0,0],
@@ -13,7 +16,15 @@ const board = [
   [0,0,0,0,8,0,0,7,9]
 ];
 
-const fixed = board.map(row => row.map(val => val !== 0));
+const fixed = board.map(r => r.map(v => v !== 0));
+const notes = Array.from({ length: 9 }, () =>
+  Array.from({ length: 9 }, () => new Set())
+);
+
+noteBtn.onclick = () => {
+  noteMode = !noteMode;
+  noteBtn.classList.toggle("active", noteMode);
+};
 
 function render() {
   boardEl.innerHTML = "";
@@ -22,8 +33,6 @@ function render() {
     for (let c = 0; c < 9; c++) {
       const cell = document.createElement("div");
       cell.className = "cell";
-
-      // bruges til styling af 3x3 felter
       cell.dataset.row = r;
       cell.dataset.col = c;
 
@@ -31,7 +40,21 @@ function render() {
       if (selected && selected[0] === r && selected[1] === c)
         cell.classList.add("selected");
 
-      cell.textContent = board[r][c] === 0 ? "" : board[r][c];
+      if (board[r][c] !== 0) {
+        const val = document.createElement("div");
+        val.className = "value";
+        val.textContent = board[r][c];
+        cell.appendChild(val);
+      } else if (notes[r][c].size > 0) {
+        const notesEl = document.createElement("div");
+        notesEl.className = "notes";
+        for (let i = 1; i <= 9; i++) {
+          const span = document.createElement("span");
+          span.textContent = notes[r][c].has(i) ? i : "";
+          notesEl.appendChild(span);
+        }
+        cell.appendChild(notesEl);
+      }
 
       cell.onclick = () => {
         selected = [r, c];
@@ -47,10 +70,21 @@ document.querySelectorAll("#numbers button").forEach((btn, i) => {
   btn.onclick = () => {
     if (!selected) return;
     const [r, c] = selected;
-    if (!fixed[r][c]) {
-      board[r][c] = i + 1;
-      render();
+    const num = i + 1;
+
+    if (fixed[r][c]) return;
+
+    if (noteMode) {
+      if (notes[r][c].has(num)) {
+        notes[r][c].delete(num);
+      } else {
+        notes[r][c].add(num);
+      }
+    } else {
+      board[r][c] = num;
+      notes[r][c].clear();
     }
+    render();
   };
 });
 
