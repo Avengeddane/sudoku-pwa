@@ -1,13 +1,27 @@
-const CACHE = "sudoku-v1";
+const CACHE = "sudoku-v2"; // ← SKIFT NAVN (det er nøglen!)
 const FILES = [
   "./",
   "index.html",
   "style.css",
-  "app.js"
+  "app.js",
+  "manifest.json"
 ];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
+  self.skipWaiting();
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(FILES))
+  );
+});
+
+self.addEventListener("activate", e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys.filter(k => k !== CACHE).map(k => caches.delete(k))
+      )
+    )
+  );
 });
 
 self.addEventListener("fetch", e => {
