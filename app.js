@@ -79,7 +79,7 @@ function render() {
 
       // Starttal (givne)
       if(fixed[r][c]) cell.classList.add("fixed");
-      // Indtastet tal
+      // Indtastet tal (kun vises hvis ikke allerede opdateret direkte)
       else if(board[r][c]!==0){
         if(board[r][c]===solution[r][c]) cell.classList.add("correct");
         else cell.classList.add("error");
@@ -109,6 +109,16 @@ function render() {
   }
 }
 
+// Funktion der sætter korrekt/error direkte for øjeblikkelig feedback
+function updateCellStatus(r,c){
+  const idx = r*9 + c;
+  const cell = boardEl.children[idx];
+  if(!cell) return;
+  cell.classList.remove("correct","error");
+  if(board[r][c] === solution[r][c]) cell.classList.add("correct");
+  else cell.classList.add("error");
+}
+
 // Tal knapper
 document.querySelectorAll("#numbers button").forEach((b,i)=>{
   b.onclick=()=>{
@@ -122,7 +132,6 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
     });
 
     const num = i + 1;
-    const cellIndex = r * 9 + c; // index i boardEl.children
 
     if(noteMode){
       // Toggle note
@@ -144,14 +153,11 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
         for(let j=0;j<3;j++)
           notes[br+i][bc+j] = notes[br+i][bc+j].filter(n => n !== num);
 
-      // 🔹 Opdater cellen direkte → øjeblikkelig fejlmarkering
-      const cell = boardEl.children[cellIndex];
-      cell.classList.remove("correct", "error");
-      if(num === solution[r][c]) cell.classList.add("correct");
-      else cell.classList.add("error");
+      // 🔹 Øjeblikkelig fejlmarkering
+      updateCellStatus(r,c);
     }
 
-    // Render resten
+    // Render resten (noter, markér samme tal)
     render();
   };
 });
@@ -159,7 +165,7 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
 // Første render
 render();
 
-// Service Worker
+// Service Worker til PWA
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
