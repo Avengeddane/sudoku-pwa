@@ -121,27 +121,37 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
       notes: JSON.parse(JSON.stringify(notes))
     });
 
-    const num=i+1;
+    const num = i + 1;
+    const cellIndex = r * 9 + c; // index i boardEl.children
+
     if(noteMode){
       // Toggle note
-      notes[r][c]=notes[r][c].includes(num)? notes[r][c].filter(n=>n!==num) : [...notes[r][c],num];
+      notes[r][c] = notes[r][c].includes(num)
+        ? notes[r][c].filter(n => n !== num)
+        : [...notes[r][c], num];
     } else {
       // Indtast tal
-      board[r][c]=num;
-      notes[r][c]=[];
+      board[r][c] = num;
+      notes[r][c] = [];
 
       // Fjern noter i samme række, kolonne og boks
       for(let k=0;k<9;k++){
-        notes[r][k]=notes[r][k].filter(n=>n!==num);
-        notes[k][c]=notes[k][c].filter(n=>n!==num);
+        notes[r][k] = notes[r][k].filter(n => n !== num);
+        notes[k][c] = notes[k][c].filter(n => n !== num);
       }
-      const br=3*Math.floor(r/3), bc=3*Math.floor(c/3);
+      const br = 3 * Math.floor(r / 3), bc = 3 * Math.floor(c / 3);
       for(let i=0;i<3;i++)
         for(let j=0;j<3;j++)
-          notes[br+i][bc+j]=notes[br+i][bc+j].filter(n=>n!==num);
+          notes[br+i][bc+j] = notes[br+i][bc+j].filter(n => n !== num);
+
+      // 🔹 Opdater cellen direkte → øjeblikkelig fejlmarkering
+      const cell = boardEl.children[cellIndex];
+      cell.classList.remove("correct", "error");
+      if(num === solution[r][c]) cell.classList.add("correct");
+      else cell.classList.add("error");
     }
 
-    // 🔹 Render med det samme → fejlmarkering sker direkte
+    // Render resten
     render();
   };
 });
