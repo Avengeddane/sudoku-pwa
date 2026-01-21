@@ -7,7 +7,7 @@ let selected = null;
 let noteMode = false;
 let undoStack = [];
 
-// Løsning til korrekt/fejl
+// Løsning
 const solution = [
   [5,3,4,6,7,8,9,1,2],
   [6,7,2,1,9,5,3,4,8],
@@ -38,7 +38,7 @@ let notes = JSON.parse(localStorage.getItem("notes")) ||
 
 const fixed = board.map((r,i)=>r.map((v,j)=>solution[i][j]===v && v!==0));
 
-// Gem
+// Gem til localStorage
 function save(){
   localStorage.setItem("board", JSON.stringify(board));
   localStorage.setItem("notes", JSON.stringify(notes));
@@ -55,7 +55,7 @@ function buildBoard(){
 
       boardEl.appendChild(cell);
 
-      // Klik
+      // Klik på celle
       cell.addEventListener("click", ()=>{
         selected=[r,c];
         updateBoardUI();
@@ -119,7 +119,7 @@ undoBtn.onclick = ()=>{
 };
 darkBtn.onclick = ()=>document.body.classList.toggle("dark");
 
-// Tal-knapper
+// Tal-knapper med øjeblikkelig fejl
 document.querySelectorAll("#numbers button").forEach((b,i)=>{
   b.onclick=()=>{
     if(!selected) return;
@@ -140,6 +140,7 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
       board[r][c] = num;
       notes[r][c] = [];
 
+      // Fjern noter i række, kolonne og boks
       for(let k=0;k<9;k++){
         notes[r][k] = notes[r][k].filter(n=>n!==num);
         notes[k][c] = notes[k][c].filter(n=>n!==num);
@@ -148,8 +149,25 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
       for(let i=0;i<3;i++)
         for(let j=0;j<3;j++)
           notes[br+i][bc+j] = notes[br+i][bc+j].filter(n=>n!==num);
+
+      // 🔹 Øjeblikkelig update af denne celle
+      const cell = boardEl.children[r*9+c];
+      cell.classList.remove("correct","error");
+      if(!fixed[r][c]){
+        if(board[r][c]===solution[r][c]) cell.classList.add("correct");
+        else cell.classList.add("error");
+      }
+      cell.innerHTML="";
+      const v = document.createElement("div");
+      v.className="value";
+      v.textContent = board[r][c];
+      cell.appendChild(v);
+
+      // Tving browser repaint
+      requestAnimationFrame(()=>{});
     }
 
+    // Opdater resten (noter, same numbers, selected)
     updateBoardUI();
   };
 });
