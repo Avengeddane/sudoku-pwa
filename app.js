@@ -7,7 +7,7 @@ let selected = null;
 let noteMode = false;
 let undoStack = [];
 
-// Løsning til korrekt/fejl-tjek
+// Løsning til korrekt/fejl
 const solution = [
   [5,3,4,6,7,8,9,1,2],
   [6,7,2,1,9,5,3,4,8],
@@ -20,7 +20,7 @@ const solution = [
   [3,4,5,2,8,6,1,7,9]
 ];
 
-// Gemt board eller startboard
+// Board og noter
 let board = JSON.parse(localStorage.getItem("board")) || [
   [5,3,0,0,7,0,0,0,0],
   [6,0,0,1,9,5,0,0,0],
@@ -33,35 +33,19 @@ let board = JSON.parse(localStorage.getItem("board")) || [
   [0,0,0,0,8,0,0,7,9]
 ];
 
-// Noter array
 let notes = JSON.parse(localStorage.getItem("notes")) ||
   Array.from({length:9},()=>Array.from({length:9},()=>[]));
 
-// Starttal/faste tal
 const fixed = board.map((r,i)=>r.map((v,j)=>solution[i][j]===v && v!==0));
 
-// Knapper
-noteBtn.onclick = () => { noteMode = !noteMode; noteBtn.classList.toggle("active", noteMode); };
-undoBtn.onclick = () => {
-  if(!undoStack.length) return;
-  const state = undoStack.pop();
-  board = state.board;
-  notes = state.notes;
-  render();
-};
-darkBtn.onclick = () => document.body.classList.toggle("dark");
-
-// Gem til localStorage
-function save() {
+// Gem
+function save(){
   localStorage.setItem("board", JSON.stringify(board));
   localStorage.setItem("notes", JSON.stringify(notes));
 }
 
-// Render board
-function render() {
-  boardEl.innerHTML = "";
-  save();
-
+// Build board én gang
+function buildBoard(){
   for(let r=0;r<9;r++){
     for(let c=0;c<9;c++){
       const cell = document.createElement("div");
@@ -69,91 +53,119 @@ function render() {
       cell.dataset.row=r;
       cell.dataset.col=c;
 
-      // Marker valgt
-      if(selected && selected[0]===r && selected[1]===c)
-        cell.classList.add("selected");
-
-      // Marker samme tal
-      if(selected && board[r][c] && board[r][c]===board[selected[0]][selected[1]])
-        cell.classList.add("same");
-
-      // Starttal (givne)
-      if(fixed[r][c]) cell.classList.add("fixed");
-
-      // Indtastet tal → korrekt eller fejl
-      if(board[r][c]!==0 && !fixed[r][c]){
-        if(board[r][c] === solution[r][c]) cell.classList.add("correct");
-        else cell.classList.add("error");
-      }
-
-      // Tilføj tal eller noter
-      if(board[r][c]){
-        const v=document.createElement("div");
-        v.className="value";
-        v.textContent=board[r][c];
-        cell.appendChild(v);
-      } else if(notes[r][c].length){
-        const n=document.createElement("div");
-        n.className="notes";
-        for(let i=1;i<=9;i++){
-          const s=document.createElement("span");
-          s.textContent=notes[r][c].includes(i)?i:"";
-          n.appendChild(s);
-        }
-        cell.appendChild(n);
-      }
-
-      // Klik på celle
-      cell.onclick=()=>{ selected=[r,c]; render(); };
+      // Tykke 3x3 linjer styres via CSS
       boardEl.appendChild(cell);
+
+      // Klik
+      cell.addEventListener("click", ()=>{
+        selected=[r,c];
+        updateBoardUI();
+      });
     }
   }
 }
 
-// Tal knapper
+// Opdater UI – farver, tal, noter
+function updateBoardUI(){
+  save();
+  for(let r=0;r<9;r++){
+    for(let c=0;c<9;c++){
+      const cell = boardEl.children[r*9+c];
+      cell.className="cell";
+      cell.dataset.row=r;
+      cell.dataset.col=c;
+
+      if(selected && selected[0]===r && selected[1]===c)
+        cell.classList.add("selected");
+
+      // Samme tal
+      if(selected && board[r][c] && board[r][c]===board[selected[0]][selected[1]])
+        cell.classList.add("same");
+
+      if(fixed[r][c]) cell.classList.add("fixed");
+
+      // Ryd gamle children
+      cell.innerHTML="";
+
+      // Tal / noter
+      if(board[r][c]!==0){
+        const v = document.createElement("div");
+        v.className="value";
+        v.textContent=board[r][c];
+        cell.appendChild(v);
+
+        // Korrekt / fejl markering
+        if(!fixed[r][c]){
+          if(board[r][c]===solution[r][c]) cell.classList.add("correct");
+          else cell.classList.add("error");
+        }
+      } else if(notes[r][c].length){
+        const n = document.createElement("div");
+        n.className="notes";
+        for(let i=1;i<=9;i++){
+          const s = document.createElement("span");
+          s.textContent = notes[r][c].includes(i)?i:"";
+          n.appendChild(s);
+        }
+        cell.appendChild(n);
+      }
+    }
+  }
+}
+
+// Knapper
+noteBtn.onclick = ()=>{ noteMode=!noteMode; noteBtn.classList.toggle("active", noteMode); };
+undoBtn.onclick = ()=>{
+  if(!undoStack.length) return;
+  const state = undoStack.pop();
+  board = state.board;
+  notes = state.notes;
+  updateBoardUI();
+};
+darkBtn.onclick = ()=>document.body.classList.toggle("dark");
+
+// Tal-knapper
 document.querySelectorAll("#numbers button").forEach((b,i)=>{
   b.onclick=()=>{
     if(!selected) return;
     const [r,c]=selected;
 
-    // Gem state til undo
     undoStack.push({
       board: JSON.parse(JSON.stringify(board)),
       notes: JSON.parse(JSON.stringify(notes))
     });
 
-    const num = i + 1;
+    const num = i+1;
 
     if(noteMode){
-      // Toggle note
-      notes[r][c] = notes[r][c].includes(num)
-        ? notes[r][c].filter(n => n !== num)
-        : [...notes[r][c], num];
+      notes[r][c] = notes[r][c].includes(num) ?
+        notes[r][c].filter(n=>n!==num) :
+        [...notes[r][c],num];
     } else {
-      // Indtast tal
       board[r][c] = num;
       notes[r][c] = [];
 
       // Fjern noter i række, kolonne og boks
       for(let k=0;k<9;k++){
-        notes[r][k] = notes[r][k].filter(n => n !== num);
-        notes[k][c] = notes[k][c].filter(n => n !== num);
+        notes[r][k] = notes[r][k].filter(n=>n!==num);
+        notes[k][c] = notes[k][c].filter(n=>n!==num);
       }
-      const br = 3 * Math.floor(r / 3), bc = 3 * Math.floor(c / 3);
+      const br = 3*Math.floor(r/3), bc=3*Math.floor(c/3);
       for(let i=0;i<3;i++)
         for(let j=0;j<3;j++)
-          notes[br+i][bc+j] = notes[br+i][bc+j].filter(n => n !== num);
+          notes[br+i][bc+j] = notes[br+i][bc+j].filter(n=>n!==num);
     }
 
-    // Render boardet → alle fejl markeres direkte
-    render();
+    // Øjeblikkelig update
+    updateBoardUI();
   };
 });
 
-// Første render
-render();
+// Init
+buildBoard();
+updateBoardUI();
 
-// Service Worker til PWA
+// Service Worker PWA
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
