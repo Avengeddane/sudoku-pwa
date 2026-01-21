@@ -20,7 +20,7 @@ const solution = [
   [3,4,5,2,8,6,1,7,9]
 ];
 
-// Gemt eller start board
+// Gemt board eller startboard
 let board = JSON.parse(localStorage.getItem("board")) || [
   [5,3,0,0,7,0,0,0,0],
   [6,0,0,1,9,5,0,0,0],
@@ -33,11 +33,14 @@ let board = JSON.parse(localStorage.getItem("board")) || [
   [0,0,0,0,8,0,0,7,9]
 ];
 
+// Noter array
 let notes = JSON.parse(localStorage.getItem("notes")) ||
   Array.from({length:9},()=>Array.from({length:9},()=>[]));
 
+// Starttal/faste tal
 const fixed = board.map((r,i)=>r.map((v,j)=>solution[i][j]===v && v!==0));
 
+// Knappetoggles
 noteBtn.onclick = () => { noteMode = !noteMode; noteBtn.classList.toggle("active", noteMode); };
 undoBtn.onclick = () => {
   if(!undoStack.length) return;
@@ -48,11 +51,13 @@ undoBtn.onclick = () => {
 };
 darkBtn.onclick = () => document.body.classList.toggle("dark");
 
+// Gem til localStorage
 function save() {
   localStorage.setItem("board", JSON.stringify(board));
   localStorage.setItem("notes", JSON.stringify(notes));
 }
 
+// Render board
 function render() {
   boardEl.innerHTML = "";
   save();
@@ -72,7 +77,7 @@ function render() {
       if(selected && board[r][c] && board[r][c]===board[selected[0]][selected[1]])
         cell.classList.add("same");
 
-      // Givet/starttal
+      // Starttal (givne)
       if(fixed[r][c]) cell.classList.add("fixed");
       // Indtastet tal
       else if(board[r][c]!==0){
@@ -80,6 +85,7 @@ function render() {
         else cell.classList.add("error");
       }
 
+      // Tilføj tal eller noter
       if(board[r][c]){
         const v=document.createElement("div");
         v.className="value";
@@ -96,12 +102,14 @@ function render() {
         cell.appendChild(n);
       }
 
+      // Klik på celle
       cell.onclick=()=>{ selected=[r,c]; render(); };
       boardEl.appendChild(cell);
     }
   }
 }
 
+// Tal knapper
 document.querySelectorAll("#numbers button").forEach((b,i)=>{
   b.onclick=()=>{
     if(!selected) return;
@@ -115,12 +123,14 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
 
     const num=i+1;
     if(noteMode){
+      // Toggle note
       notes[r][c]=notes[r][c].includes(num)? notes[r][c].filter(n=>n!==num) : [...notes[r][c],num];
     } else {
+      // Indtast tal
       board[r][c]=num;
       notes[r][c]=[];
 
-      // Fjern noter i række/kolonne/boks
+      // Fjern noter i samme række, kolonne og boks
       for(let k=0;k<9;k++){
         notes[r][k]=notes[r][k].filter(n=>n!==num);
         notes[k][c]=notes[k][c].filter(n=>n!==num);
@@ -131,13 +141,15 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
           notes[br+i][bc+j]=notes[br+i][bc+j].filter(n=>n!==num);
     }
 
-    // 🔹 Render med det samme efter indsættelse
+    // 🔹 Render med det samme → fejlmarkering sker direkte
     render();
   };
 });
 
+// Første render
 render();
 
+// Service Worker
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
