@@ -43,16 +43,20 @@ h1 { margin-bottom: 20px; }
   width: 42px;
   height: 42px;
   background: var(--cell);
-  border: 1px solid #aaa;
+  border: 1px solid #aaa; /* standard linje */
   cursor: pointer;
 }
 
-/* 3x3 bokse linjer */
-.cell[data-col="2"], .cell[data-col="5"] { border-right: 3px solid var(--line); }
-.cell[data-row="2"], .cell[data-row="5"] { border-bottom: 3px solid var(--line); }
+/* Lodrette linjer mellem 3x3 bokse */
 .cell[data-col="0"] { border-left: 3px solid var(--line); }
-.cell[data-row="0"] { border-top: 3px solid var(--line); }
+.cell[data-col="3"] { border-left: 3px solid var(--line); }
+.cell[data-col="6"] { border-left: 3px solid var(--line); }
 .cell[data-col="8"] { border-right: 3px solid var(--line); }
+
+/* Vandrette linjer mellem 3x3 bokse */
+.cell[data-row="0"] { border-top: 3px solid var(--line); }
+.cell[data-row="3"] { border-top: 3px solid var(--line); }
+.cell[data-row="6"] { border-top: 3px solid var(--line); }
 .cell[data-row="8"] { border-bottom: 3px solid var(--line); }
 
 /* farver og highlights */
