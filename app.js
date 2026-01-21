@@ -23,6 +23,10 @@ function render() {
       const cell = document.createElement("div");
       cell.className = "cell";
 
+      // bruges til styling af 3x3 felter
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+
       if (fixed[r][c]) cell.classList.add("fixed");
       if (selected && selected[0] === r && selected[1] === c)
         cell.classList.add("selected");
