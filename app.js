@@ -7,7 +7,7 @@ let selected = null;
 let noteMode = false;
 let undoStack = [];
 
-// Løsning til automatisk korrekt/fejl-tjek
+// Løsning til korrekt/fejl-tjek
 const solution = [
   [5,3,4,6,7,8,9,1,2],
   [6,7,2,1,9,5,3,4,8],
@@ -40,7 +40,7 @@ let notes = JSON.parse(localStorage.getItem("notes")) ||
 // Starttal/faste tal
 const fixed = board.map((r,i)=>r.map((v,j)=>solution[i][j]===v && v!==0));
 
-// Knappetoggles
+// Knapper
 noteBtn.onclick = () => { noteMode = !noteMode; noteBtn.classList.toggle("active", noteMode); };
 undoBtn.onclick = () => {
   if(!undoStack.length) return;
@@ -79,9 +79,10 @@ function render() {
 
       // Starttal (givne)
       if(fixed[r][c]) cell.classList.add("fixed");
-      // Indtastet tal (kun vises hvis ikke allerede opdateret direkte)
-      else if(board[r][c]!==0){
-        if(board[r][c]===solution[r][c]) cell.classList.add("correct");
+
+      // Indtastet tal → korrekt eller fejl
+      if(board[r][c]!==0 && !fixed[r][c]){
+        if(board[r][c] === solution[r][c]) cell.classList.add("correct");
         else cell.classList.add("error");
       }
 
@@ -109,16 +110,6 @@ function render() {
   }
 }
 
-// Funktion der sætter korrekt/error direkte for øjeblikkelig feedback
-function updateCellStatus(r,c){
-  const idx = r*9 + c;
-  const cell = boardEl.children[idx];
-  if(!cell) return;
-  cell.classList.remove("correct","error");
-  if(board[r][c] === solution[r][c]) cell.classList.add("correct");
-  else cell.classList.add("error");
-}
-
 // Tal knapper
 document.querySelectorAll("#numbers button").forEach((b,i)=>{
   b.onclick=()=>{
@@ -143,7 +134,7 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
       board[r][c] = num;
       notes[r][c] = [];
 
-      // Fjern noter i samme række, kolonne og boks
+      // Fjern noter i række, kolonne og boks
       for(let k=0;k<9;k++){
         notes[r][k] = notes[r][k].filter(n => n !== num);
         notes[k][c] = notes[k][c].filter(n => n !== num);
@@ -152,12 +143,9 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
       for(let i=0;i<3;i++)
         for(let j=0;j<3;j++)
           notes[br+i][bc+j] = notes[br+i][bc+j].filter(n => n !== num);
-
-      // 🔹 Øjeblikkelig fejlmarkering
-      updateCellStatus(r,c);
     }
 
-    // Render resten (noter, markér samme tal)
+    // Render boardet → alle fejl markeres direkte
     render();
   };
 });
