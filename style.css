@@ -28,11 +28,8 @@ body {
   padding: 20px;
 }
 
-h1 {
-  margin-bottom: 20px;
-}
+h1 { margin-bottom: 20px; }
 
-/* Sudoku board */
 #board {
   display: grid;
   grid-template-columns: repeat(9, 42px);
@@ -41,7 +38,6 @@ h1 {
   margin: 20px auto;
 }
 
-/* Cellestil */
 .cell {
   position: relative;
   width: 42px;
@@ -58,48 +54,17 @@ h1 {
 .cell[data-row="0"], .cell[data-row="3"], .cell[data-row="6"] { border-top: 3px solid var(--line); }
 .cell[data-row="8"] { border-bottom: 3px solid var(--line); }
 
-/* Farver og highlights */
-.cell.fixed {
-  font-weight: bold;
-  color: var(--text);
-}
+/* Farver */
+.cell.fixed { font-weight: bold; color: var(--text); }
+.cell.correct { font-weight: bold; color: var(--correct); }
+.cell.error { background: var(--error); }
+.cell.selected { background: var(--selected); }
+.cell.same { background: var(--same); }
 
-.cell.correct {
-  font-weight: bold;
-  color: var(--correct);
-}
+.value { line-height: 42px; font-size: 18px; }
+.notes { display: grid; grid-template-columns: repeat(3, 1fr); font-size: 10px; padding: 2px; }
+.notes span { color: #555; }
 
-.cell.error {
-  background: var(--error);
-}
-
-.cell.selected {
-  background: var(--selected);
-}
-
-.cell.same {
-  background: var(--same);
-}
-
-/* Tal i cellen */
-.value {
-  line-height: 42px;
-  font-size: 18px;
-}
-
-/* Noter / pencil marks */
-.notes {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  font-size: 10px;
-  padding: 2px;
-}
-
-.notes span {
-  color: #555;
-}
-
-/* Knapper */
 button {
   margin: 4px;
   padding: 8px;
@@ -110,11 +75,5 @@ button {
   font-weight: bold;
   cursor: pointer;
 }
-
-button:hover {
-  opacity: 0.9;
-}
-
-#noteToggle.active {
-  background: #ff9f0a;
-}
+button:hover { opacity: 0.9; }
+#noteToggle.active { background: #ff9f0a; }
