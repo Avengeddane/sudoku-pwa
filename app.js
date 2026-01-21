@@ -21,15 +21,11 @@ function render() {
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
       const cell = document.createElement("div");
-      cell.classList.add("cell");
+      cell.className = "cell";
 
-      if (fixed[r][c]) {
-        cell.classList.add("fixed");
-      }
-
-      if (selected && selected[0] === r && selected[1] === c) {
+      if (fixed[r][c]) cell.classList.add("fixed");
+      if (selected && selected[0] === r && selected[1] === c)
         cell.classList.add("selected");
-      }
 
       cell.textContent = board[r][c] === 0 ? "" : board[r][c];
 
@@ -46,9 +42,7 @@ function render() {
 document.querySelectorAll("#numbers button").forEach((btn, i) => {
   btn.onclick = () => {
     if (!selected) return;
-
     const [r, c] = selected;
-
     if (!fixed[r][c]) {
       board[r][c] = i + 1;
       render();
@@ -58,7 +52,6 @@ document.querySelectorAll("#numbers button").forEach((btn, i) => {
 
 render();
 
-// Service Worker (offline)
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");
 }
