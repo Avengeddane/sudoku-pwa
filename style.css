@@ -6,10 +6,6 @@ body {
   padding: 20px;
 }
 
-h1 {
-  margin-bottom: 20px;
-}
-
 #board {
   display: grid;
   grid-template-columns: repeat(9, 42px);
@@ -19,41 +15,23 @@ h1 {
 }
 
 .cell {
+  position: relative;
   width: 42px;
   height: 42px;
   background: white;
-  font-size: 18px;
-  line-height: 42px;
-  cursor: pointer;
-
-  /* standard tynde linjer */
   border: 1px solid #c7c7cc;
+  cursor: pointer;
 }
 
-/* TYKKE LINJER MELLEM 3x3 FELTER */
+/* 3x3 linjer */
 .cell[data-col="2"],
-.cell[data-col="5"] {
-  border-right: 3px solid #000;
-}
-
+.cell[data-col="5"] { border-right: 3px solid #000; }
 .cell[data-row="2"],
-.cell[data-row="5"] {
-  border-bottom: 3px solid #000;
-}
-
-/* ydre ramme */
-.cell[data-col="0"] {
-  border-left: 3px solid #000;
-}
-.cell[data-row="0"] {
-  border-top: 3px solid #000;
-}
-.cell[data-col="8"] {
-  border-right: 3px solid #000;
-}
-.cell[data-row="8"] {
-  border-bottom: 3px solid #000;
-}
+.cell[data-row="5"] { border-bottom: 3px solid #000; }
+.cell[data-col="0"] { border-left: 3px solid #000; }
+.cell[data-row="0"] { border-top: 3px solid #000; }
+.cell[data-col="8"] { border-right: 3px solid #000; }
+.cell[data-row="8"] { border-bottom: 3px solid #000; }
 
 .cell.fixed {
   font-weight: bold;
@@ -63,13 +41,37 @@ h1 {
   background: #cce4ff;
 }
 
-#numbers button {
+/* stort tal */
+.cell .value {
+  font-size: 18px;
+  line-height: 42px;
+}
+
+/* noter */
+.notes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  font-size: 10px;
+  line-height: 1;
+  padding: 2px;
+}
+
+.notes span {
+  color: #555;
+}
+
+#numbers button,
+#controls button {
   margin: 4px;
   width: 36px;
   height: 36px;
-  font-size: 16px;
+  font-size: 14px;
   border: none;
   border-radius: 6px;
   background: #007aff;
   color: white;
+}
+
+#noteToggle.active {
+  background: #ff9f0a;
 }
