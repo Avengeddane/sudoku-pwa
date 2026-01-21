@@ -53,7 +53,6 @@ function buildBoard(){
       cell.dataset.row=r;
       cell.dataset.col=c;
 
-      // Tykke 3x3 linjer styres via CSS
       boardEl.appendChild(cell);
 
       // Klik
@@ -65,7 +64,7 @@ function buildBoard(){
   }
 }
 
-// Opdater UI – farver, tal, noter
+// Opdater UI
 function updateBoardUI(){
   save();
   for(let r=0;r<9;r++){
@@ -78,23 +77,19 @@ function updateBoardUI(){
       if(selected && selected[0]===r && selected[1]===c)
         cell.classList.add("selected");
 
-      // Samme tal
       if(selected && board[r][c] && board[r][c]===board[selected[0]][selected[1]])
         cell.classList.add("same");
 
       if(fixed[r][c]) cell.classList.add("fixed");
 
-      // Ryd gamle children
       cell.innerHTML="";
 
-      // Tal / noter
       if(board[r][c]!==0){
         const v = document.createElement("div");
         v.className="value";
         v.textContent=board[r][c];
         cell.appendChild(v);
 
-        // Korrekt / fejl markering
         if(!fixed[r][c]){
           if(board[r][c]===solution[r][c]) cell.classList.add("correct");
           else cell.classList.add("error");
@@ -145,7 +140,6 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
       board[r][c] = num;
       notes[r][c] = [];
 
-      // Fjern noter i række, kolonne og boks
       for(let k=0;k<9;k++){
         notes[r][k] = notes[r][k].filter(n=>n!==num);
         notes[k][c] = notes[k][c].filter(n=>n!==num);
@@ -156,7 +150,6 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
           notes[br+i][bc+j] = notes[br+i][bc+j].filter(n=>n!==num);
     }
 
-    // Øjeblikkelig update
     updateBoardUI();
   };
 });
@@ -165,7 +158,7 @@ document.querySelectorAll("#numbers button").forEach((b,i)=>{
 buildBoard();
 updateBoardUI();
 
-// Service Worker PWA
+// Service Worker
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
