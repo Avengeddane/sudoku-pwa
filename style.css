@@ -12,18 +12,21 @@ h1 {
 
 #board {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  max-width: 360px;
-  margin: auto;
-  gap: 2px;
+  grid-template-columns: repeat(9, 40px);
+  grid-template-rows: repeat(9, 40px);
+  gap: 4px;
+  justify-content: center;
+  margin: 0 auto 20px;
 }
 
 .cell {
-  background: white;
+  width: 40px;
   height: 40px;
-  line-height: 40px;
-  font-size: 18px;
+  background: white;
   border-radius: 6px;
+  font-size: 18px;
+  line-height: 40px;
+  cursor: pointer;
 }
 
 .cell.fixed {
@@ -32,10 +35,6 @@ h1 {
 
 .cell.selected {
   background: #cce4ff;
-}
-
-#numbers {
-  margin-top: 20px;
 }
 
 #numbers button {
