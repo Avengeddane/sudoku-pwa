@@ -38,72 +38,72 @@ let notes = JSON.parse(localStorage.getItem("notes")) ||
 
 const fixed = board.map((r,i)=>r.map((v,j)=>solution[i][j]===v && v!==0));
 
-// Gem til localStorage
+// Gem
 function save(){
   localStorage.setItem("board", JSON.stringify(board));
   localStorage.setItem("notes", JSON.stringify(notes));
 }
 
-// Build board én gang
+// Build board én gang med input felter
 function buildBoard(){
+  boardEl.innerHTML="";
   for(let r=0;r<9;r++){
     for(let c=0;c<9;c++){
-      const cell = document.createElement("div");
-      cell.className="cell";
-      cell.dataset.row=r;
-      cell.dataset.col=c;
+      const input = document.createElement("input");
+      input.type="text";
+      input.maxLength=1;
+      input.dataset.row=r;
+      input.dataset.col=c;
+      input.className="cell";
 
-      boardEl.appendChild(cell);
+      // Tykke 3x3 linjer via CSS
+      if(c%3===0) input.style.borderLeftWidth="3px";
+      if(c===8) input.style.borderRightWidth="3px";
+      if(r%3===0) input.style.borderTopWidth="3px";
+      if(r===8) input.style.borderBottomWidth="3px";
 
-      // Klik på celle
-      cell.addEventListener("click", ()=>{
-        selected=[r,c];
-        updateBoardUI();
-      });
-    }
-  }
-}
-
-// Opdater UI
-function updateBoardUI(){
-  save();
-  for(let r=0;r<9;r++){
-    for(let c=0;c<9;c++){
-      const cell = boardEl.children[r*9+c];
-      cell.className="cell";
-      cell.dataset.row=r;
-      cell.dataset.col=c;
-
-      if(selected && selected[0]===r && selected[1]===c)
-        cell.classList.add("selected");
-
-      if(selected && board[r][c] && board[r][c]===board[selected[0]][selected[1]])
-        cell.classList.add("same");
-
-      if(fixed[r][c]) cell.classList.add("fixed");
-
-      cell.innerHTML="";
-
-      if(board[r][c]!==0){
-        const v = document.createElement("div");
-        v.className="value";
-        v.textContent=board[r][c];
-        cell.appendChild(v);
-
-        if(!fixed[r][c]){
-          if(board[r][c]===solution[r][c]) cell.classList.add("correct");
-          else cell.classList.add("error");
-        }
-      } else if(notes[r][c].length){
-        const n = document.createElement("div");
-        n.className="notes";
-        for(let i=1;i<=9;i++){
-          const s = document.createElement("span");
-          s.textContent = notes[r][c].includes(i)?i:"";
-          n.appendChild(s);
-        }
-        cell.appendChild(n);
+      if(fixed[r][c]){
+        input.value = board[r][c];
+        input.disabled = true;
+        input.classList.add("fixed");
       }
+
+      // Input event for øjeblikkelig fejl
+      input.addEventListener("input", ()=>{
+        let val = parseInt(input.value);
+        if(isNaN(val) || val<1 || val>9) val="";
+        input.value = val;
+
+        // Gem gamle værdier til undo
+        undoStack.push({
+          board: JSON.parse(JSON.stringify(board)),
+          notes: JSON.parse(JSON.stringify(notes))
+        });
+
+        board[r][c] = val || 0;
+        notes[r][c] = [];
+
+        // Fjern noter i række, kolonne og boks
+        if(val){
+          for(let k=0;k<9;k++){
+            notes[r][k] = notes[r][k].filter(n=>n!==val);
+            notes[k][c] = notes[k][c].filter(n=>n!==val);
+          }
+          const br = 3*Math.floor(r/3), bc=3*Math.floor(c/3);
+          for(let i=0;i<3;i++)
+            for(let j=0;j<3;j++)
+              notes[br+i][bc+j] = notes[br+i][bc+j].filter(n=>n!==val);
+        }
+
+        // Øjeblikkelig korrekt/fejl markering
+        input.classList.remove("correct","error");
+        if(val){
+          if(val===solution[r][c]) input.classList.add("correct");
+          else input.classList.add("error");
+        }
+      });
+
+      boardEl.appendChild(input);
     }
   }
 }
@@ -115,68 +115,31 @@ undoBtn.onclick = ()=>{
   const state = undoStack.pop();
   board = state.board;
   notes = state.notes;
-  updateBoardUI();
+  buildBoard(); // rebuild for simplicity
 };
 darkBtn.onclick = ()=>document.body.classList.toggle("dark");
 
-// Tal-knapper med øjeblikkelig fejl
+// Tal-knapper
 document.querySelectorAll("#numbers button").forEach((b,i)=>{
   b.onclick=()=>{
+    const val = i+1;
     if(!selected) return;
-    const [r,c]=selected;
-
-    undoStack.push({
-      board: JSON.parse(JSON.stringify(board)),
-      notes: JSON.parse(JSON.stringify(notes))
-    });
-
-    const num = i+1;
-
-    if(noteMode){
-      notes[r][c] = notes[r][c].includes(num) ?
-        notes[r][c].filter(n=>n!==num) :
-        [...notes[r][c],num];
-    } else {
-      board[r][c] = num;
-      notes[r][c] = [];
-
-      // Fjern noter i række, kolonne og boks
-      for(let k=0;k<9;k++){
-        notes[r][k] = notes[r][k].filter(n=>n!==num);
-        notes[k][c] = notes[k][c].filter(n=>n!==num);
-      }
-      const br = 3*Math.floor(r/3), bc=3*Math.floor(c/3);
-      for(let i=0;i<3;i++)
-        for(let j=0;j<3;j++)
-          notes[br+i][bc+j] = notes[br+i][bc+j].filter(n=>n!==num);
-
-      // 🔹 Øjeblikkelig update af denne celle
-      const cell = boardEl.children[r*9+c];
-      cell.classList.remove("correct","error");
-      if(!fixed[r][c]){
-        if(board[r][c]===solution[r][c]) cell.classList.add("correct");
-        else cell.classList.add("error");
-      }
-      cell.innerHTML="";
-      const v = document.createElement("div");
-      v.className="value";
-      v.textContent = board[r][c];
-      cell.appendChild(v);
-
-      // Tving browser repaint
-      requestAnimationFrame(()=>{});
-    }
-
-    // Opdater resten (noter, same numbers, selected)
-    updateBoardUI();
+    const input = boardEl.children[selected[0]*9 + selected[1]];
+    input.value = val;
+    input.dispatchEvent(new Event("input"));
+    input.focus();
   };
+});
+
+// Klik for selection
+boardEl.addEventListener("click", e=>{
+  if(e.target.tagName==="INPUT") selected=[parseInt(e.target.dataset.row),parseInt(e.target.dataset.col)];
 });
 
 // Init
 buildBoard();
-updateBoardUI();
 
-// Service Worker
+// Service Worker PWA
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
