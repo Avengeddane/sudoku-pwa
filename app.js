@@ -34,4 +34,108 @@ let board = JSON.parse(localStorage.getItem("board")) || [
 ];
 
 let notes = JSON.parse(localStorage.getItem("notes")) ||
-  Array.from({length:9},()=>Array.from({leng
+  Array.from({length:9},()=>Array.from({length:9},()=>[]));
+
+const fixed = board.map((r,i)=>r.map((v,j)=>solution[i][j]===v && v!==0));
+
+noteBtn.onclick = () => { noteMode = !noteMode; noteBtn.classList.toggle("active", noteMode); };
+undoBtn.onclick = () => {
+  if(!undoStack.length) return;
+  const state = undoStack.pop();
+  board = state.board;
+  notes = state.notes;
+  render();
+};
+darkBtn.onclick = () => document.body.classList.toggle("dark");
+
+function save() {
+  localStorage.setItem("board", JSON.stringify(board));
+  localStorage.setItem("notes", JSON.stringify(notes));
+}
+
+function render() {
+  boardEl.innerHTML = "";
+  save();
+
+  for(let r=0;r<9;r++){
+    for(let c=0;c<9;c++){
+      const cell = document.createElement("div");
+      cell.className="cell";
+      cell.dataset.row=r;
+      cell.dataset.col=c;
+
+      // Marker valgt
+      if(selected && selected[0]===r && selected[1]===c)
+        cell.classList.add("selected");
+
+      // Marker samme tal
+      if(selected && board[r][c] && board[r][c]===board[selected[0]][selected[1]])
+        cell.classList.add("same");
+
+      // Givet/starttal
+      if(fixed[r][c]) cell.classList.add("fixed");
+      // Indtastet tal
+      else if(board[r][c]!==0){
+        if(board[r][c]===solution[r][c]) cell.classList.add("correct");
+        else cell.classList.add("error");
+      }
+
+      if(board[r][c]){
+        const v=document.createElement("div");
+        v.className="value";
+        v.textContent=board[r][c];
+        cell.appendChild(v);
+      } else if(notes[r][c].length){
+        const n=document.createElement("div");
+        n.className="notes";
+        for(let i=1;i<=9;i++){
+          const s=document.createElement("span");
+          s.textContent=notes[r][c].includes(i)?i:"";
+          n.appendChild(s);
+        }
+        cell.appendChild(n);
+      }
+
+      cell.onclick=()=>{ selected=[r,c]; render(); };
+      boardEl.appendChild(cell);
+    }
+  }
+}
+
+document.querySelectorAll("#numbers button").forEach((b,i)=>{
+  b.onclick=()=>{
+    if(!selected) return;
+    const [r,c]=selected;
+
+    // Gem state til undo
+    undoStack.push({
+      board: JSON.parse(JSON.stringify(board)),
+      notes: JSON.parse(JSON.stringify(notes))
+    });
+
+    const num=i+1;
+    if(noteMode){
+      notes[r][c]=notes[r][c].includes(num)? notes[r][c].filter(n=>n!==num) : [...notes[r][c],num];
+    } else {
+      board[r][c]=num;
+      notes[r][c]=[];
+
+      // Fjern noter i række/kolonne/boks
+      for(let k=0;k<9;k++){
+        notes[r][k]=notes[r][k].filter(n=>n!==num);
+        notes[k][c]=notes[k][c].filter(n=>n!==num);
+      }
+      const br=3*Math.floor(r/3), bc=3*Math.floor(c/3);
+      for(let i=0;i<3;i++)
+        for(let j=0;j<3;j++)
+          notes[br+i][bc+j]=notes[br+i][bc+j].filter(n=>n!==num);
+    }
+    render();
+  };
+});
+
+render();
+
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js");
+}
