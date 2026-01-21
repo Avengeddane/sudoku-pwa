@@ -1,0 +1,50 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  text-align: center;
+  background: #f5f5f7;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  max-width: 360px;
+  margin: auto;
+  gap: 2px;
+}
+
+.cell {
+  background: white;
+  height: 40px;
+  line-height: 40px;
+  font-size: 18px;
+  border-radius: 6px;
+}
+
+.cell.fixed {
+  font-weight: bold;
+}
+
+.cell.selected {
+  background: #cce4ff;
+}
+
+#numbers {
+  margin-top: 20px;
+}
+
+#numbers button {
+  margin: 4px;
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  background: #007aff;
+  color: white;
+}
