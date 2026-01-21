@@ -12,21 +12,47 @@ h1 {
 
 #board {
   display: grid;
-  grid-template-columns: repeat(9, 40px);
-  grid-template-rows: repeat(9, 40px);
-  gap: 4px;
+  grid-template-columns: repeat(9, 42px);
+  grid-template-rows: repeat(9, 42px);
   justify-content: center;
   margin: 0 auto 20px;
 }
 
 .cell {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   background: white;
-  border-radius: 6px;
   font-size: 18px;
-  line-height: 40px;
+  line-height: 42px;
   cursor: pointer;
+
+  /* standard tynde linjer */
+  border: 1px solid #c7c7cc;
+}
+
+/* TYKKE LINJER MELLEM 3x3 FELTER */
+.cell[data-col="2"],
+.cell[data-col="5"] {
+  border-right: 3px solid #000;
+}
+
+.cell[data-row="2"],
+.cell[data-row="5"] {
+  border-bottom: 3px solid #000;
+}
+
+/* ydre ramme */
+.cell[data-col="0"] {
+  border-left: 3px solid #000;
+}
+.cell[data-row="0"] {
+  border-top: 3px solid #000;
+}
+.cell[data-col="8"] {
+  border-right: 3px solid #000;
+}
+.cell[data-row="8"] {
+  border-bottom: 3px solid #000;
 }
 
 .cell.fixed {
